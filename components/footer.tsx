@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-10">
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Luxury Estates</h3>
+            <h3 className="text-xl font-semibold">A.myth Estates</h3>
             <p className="text-muted-foreground max-w-xs">
               Specializing in premium properties that offer exceptional living experiences and investment opportunities.
             </p>
@@ -69,7 +69,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 mr-2 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">123 Luxury Lane, Beverly Hills, CA 90210</span>
+                <span className="text-muted-foreground">Bhauwala, Uttarakhand 248007</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-muted-foreground" />
@@ -77,14 +77,14 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-muted-foreground" />
-                <span className="text-muted-foreground">info@luxuryestates.com</span>
+                <span className="text-muted-foreground">info@amythestetes.com</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Luxury Estates. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} A.myth Estates. All rights reserved.</p>
         </div>
       </div>
     </footer>

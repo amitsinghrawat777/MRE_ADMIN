@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building, Plus, LogOut } from 'lucide-react';
+import { Building, Plus, LogOut, Mail } from 'lucide-react';
 import AdminPropertiesList from '@/components/admin-properties-list';
 import AdminPropertyForm from '@/components/admin-property-form';
 import { toast } from 'sonner';
@@ -21,7 +21,17 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [properties, setProperties] = useState<Property[]>(initialProperties);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
+
+  useEffect(() => {
+    if (pathname === '/admin/inquiries') {
+      setActiveTab('inquiries');
+    } else if (activeTab === 'inquiries') {
+      // If we navigate away from inquiries, default to properties
+      setActiveTab('properties');
+    }
+  }, [pathname, activeTab]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -107,6 +117,17 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     }
   };
 
+  const handleTabChange = (value: string) => {
+    if (value === 'inquiries') {
+      router.push('/admin/inquiries');
+    } else {
+      if (pathname === '/admin/inquiries') {
+        router.push('/admin-dashboard');
+      }
+      setActiveTab(value);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen pt-20 md:pt-24">
       <div className="container mx-auto px-4 py-8">
@@ -125,12 +146,16 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <div className="flex justify-between items-center mb-6">
             <TabsList>
               <TabsTrigger value="properties" className="flex items-center">
                 <Building className="h-4 w-4 mr-2" />
                 Properties
+              </TabsTrigger>
+               <TabsTrigger value="inquiries" className="flex items-center">
+                <Mail className="h-4 w-4 mr-2" />
+                Inquiries
               </TabsTrigger>
               <TabsTrigger value="add-edit" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />

@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 
 interface AdminPropertyFormProps {
   property: Property | null;
-  onSave: (propertyData: Omit<Property, 'id' | 'created_at'>, id?: string) => Promise<void>;
+  onSave: (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -145,29 +145,14 @@ export default function AdminPropertyForm({
     setFormData(prev => ({ ...prev, images: prev.images?.filter((_, i) => i !== index) || [] }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    const dataToSave: Partial<Omit<Property, 'id' | 'created_at'>> = { ...formData };
-
-    Object.keys(dataToSave).forEach(keyStr => {
-      const key = keyStr as keyof typeof dataToSave;
-      if (dataToSave[key] === undefined || dataToSave[key] === null) {
-        delete dataToSave[key];
-      }
-    });
-
-    if (dataToSave.property_type === 'Land') {
-      delete dataToSave.bedrooms;
-      delete dataToSave.bathrooms;
-      delete dataToSave.sqft;
-      delete dataToSave.year_built;
+    try {
+      await onSave(formData, property?.id);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    await onSave(dataToSave as Omit<Property, 'id' | 'created_at'>, property?.id);
-    
-    setIsSubmitting(false);
   };
 
   const isLand = formData.property_type === 'Land';

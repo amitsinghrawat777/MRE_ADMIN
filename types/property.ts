@@ -1,5 +1,6 @@
 export interface Property {
-  id: string;
+  id: number;
+  created_at: string;
   title: string;
   description: string;
   price: number;

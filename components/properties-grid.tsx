@@ -8,6 +8,7 @@ import {
   CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { 
   MapPin, 
   Bed, 
@@ -41,15 +42,19 @@ const propertyTypes = [
 // Price range options
 const priceRanges = [
   { value: 'all', label: 'Any Price' },
-  { value: '0-3000000', label: 'Under $3M' },
-  { value: '3000000-5000000', label: '$3M - $5M' },
-  { value: '5000000-10000000', label: '$5M - $10M' },
-  { value: '10000000-100000000', label: 'Over $10M' },
+  { value: '0-20000000', label: 'Under ₹2 Cr' },
+  { value: '20000000-30000000', label: '₹2 Cr - ₹3 Cr' },
+  { value: '30000000-50000000', label: '₹3 Cr - ₹5 Cr' },
+  { value: '50000000-100000000', label: '₹5 Cr - ₹10 Cr' },
+  { value: '100000000-10000000000', label: 'Over ₹10 Cr' },
+  { value: 'custom', label: 'Custom' },
 ];
 
 export default function PropertiesGrid({ initialProperties }: PropertiesGridProps) {
   const [propertyType, setPropertyType] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
+  const [customMinPrice, setCustomMinPrice] = useState('');
+  const [customMaxPrice, setCustomMaxPrice] = useState('');
   
   // Filter properties based on selected filters
   const filteredProperties = initialProperties.filter((property: Property) => {
@@ -58,8 +63,14 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
       return false;
     }
     
-    // Filter by price range
-    if (priceRange !== 'all') {
+    // Filter by price
+    if (priceRange === 'custom') {
+      const min = parseFloat(customMinPrice);
+      const max = parseFloat(customMaxPrice);
+      if ((customMinPrice && property.price < min) || (customMaxPrice && property.price > max)) {
+        return false;
+      }
+    } else if (priceRange !== 'all') {
       const [minPrice, maxPrice] = priceRange.split('-').map(Number);
       if (property.price < minPrice || (maxPrice && property.price > maxPrice)) {
         return false;
@@ -69,10 +80,18 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
     return true;
   });
 
+  const handlePriceRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPriceRange(e.target.value);
+    if (e.target.value !== 'custom') {
+      setCustomMinPrice('');
+      setCustomMaxPrice('');
+    }
+  };
+
   return (
     <div>
       {/* Filter controls */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8 p-4 bg-muted/40 rounded-lg">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 p-4 bg-muted/40 rounded-lg items-center">
         <div className="flex items-center gap-2">
           <HomeIcon className="h-4 w-4 text-muted-foreground" />
           <select 
@@ -91,13 +110,33 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
           <select 
             className="bg-background border rounded-md text-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
             value={priceRange}
-            onChange={(e) => setPriceRange(e.target.value)}
+            onChange={handlePriceRangeChange}
           >
             {priceRanges.map(range => (
               <option key={range.value} value={range.value}>{range.label}</option>
             ))}
           </select>
         </div>
+
+        {priceRange === 'custom' && (
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              placeholder="Min Price"
+              className="bg-background border rounded-md text-sm p-2 h-auto"
+              value={customMinPrice}
+              onChange={(e) => setCustomMinPrice(e.target.value)}
+            />
+            <span>-</span>
+            <Input
+              type="number"
+              placeholder="Max Price"
+              className="bg-background border rounded-md text-sm p-2 h-auto"
+              value={customMaxPrice}
+              onChange={(e) => setCustomMaxPrice(e.target.value)}
+            />
+          </div>
+        )}
         
         <div className="ml-auto text-sm text-muted-foreground self-center">
           {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} found
