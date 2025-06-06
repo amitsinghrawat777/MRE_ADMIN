@@ -138,7 +138,7 @@ export default function AdminPropertyForm({
       setIsUploading(false);
     }
   };
-  
+
   const handleRemoveImage = (index: number) => {
     // Note: This only removes the image from the form state.
     // To delete from ImgBB, you would need to store and use the delete_url.
@@ -151,7 +151,7 @@ export default function AdminPropertyForm({
     try {
       await onSave(formData, property?.id);
     } finally {
-      setIsSubmitting(false);
+    setIsSubmitting(false);
     }
   };
 
@@ -265,17 +265,17 @@ export default function AdminPropertyForm({
               {formData.images?.map((url, index) => (
                 <div key={index} className="relative group">
                   <img src={url} alt={`Property image ${index + 1}`} className="w-full h-32 object-cover rounded-md" />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
                     className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleRemoveImage(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                        onClick={() => handleRemoveImage(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
               <Card
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full h-32 flex items-center justify-center border-2 border-dashed hover:border-primary transition-colors cursor-pointer"
@@ -284,13 +284,13 @@ export default function AdminPropertyForm({
                   <div className="text-center">
                     <Loader2 className="h-6 w-6 mx-auto text-muted-foreground animate-spin" />
                     <p className="mt-1 text-sm text-muted-foreground">Uploading...</p>
-                  </div>
-                ) : (
+                </div>
+              ) : (
                   <div className="text-center">
                     <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
                     <p className="mt-1 text-sm text-muted-foreground">Add Image</p>
-                  </div>
-                )}
+                </div>
+              )}
               </Card>
               <input 
                 type="file" 

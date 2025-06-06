@@ -69,44 +69,44 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
             <div className="mt-8">
               <div className="flex justify-between items-start">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold">{property.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">{property.title}</h1>
                   <div className="flex items-center mt-2 text-muted-foreground">
-                    <MapPin className="h-5 w-5 mr-2" />
+          <MapPin className="h-5 w-5 mr-2" />
                     <span>{property.location}</span>
                   </div>
-                </div>
+        </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="icon"><Share2 className="h-4 w-4" /></Button>
                   <Button variant="outline" size="icon"><Heart className="h-4 w-4" /></Button>
-                </div>
-              </div>
+        </div>
+      </div>
 
               <div className="mt-6 flex flex-wrap gap-4 text-center">
                 {property.bedrooms && (
                   <div className="flex-1 bg-muted/40 p-3 rounded-lg">
                     <Bed className="h-6 w-6 mx-auto text-primary" />
                     <p className="mt-1 text-sm font-medium">{property.bedrooms} Beds</p>
-                  </div>
+        </div>
                 )}
                 {property.bathrooms && (
                   <div className="flex-1 bg-muted/40 p-3 rounded-lg">
                     <Bath className="h-6 w-6 mx-auto text-primary" />
                     <p className="mt-1 text-sm font-medium">{property.bathrooms} Baths</p>
-                  </div>
+        </div>
                 )}
                 {property.sqft && (
                   <div className="flex-1 bg-muted/40 p-3 rounded-lg">
                     <Move className="h-6 w-6 mx-auto text-primary" />
                     <p className="mt-1 text-sm font-medium">{property.sqft.toLocaleString()} sqft</p>
-                  </div>
+      </div>
                 )}
                 {property.property_type && (
                   <div className="flex-1 bg-muted/40 p-3 rounded-lg">
                     <Building className="h-6 w-6 mx-auto text-primary" />
                     <p className="mt-1 text-sm font-medium">{property.property_type}</p>
-                  </div>
+          </div>
                 )}
-              </div>
+      </div>
 
               <Separator className="my-8" />
 
@@ -127,7 +127,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
                     <AvatarImage src="/placeholder-agent.jpg" alt="Agent" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
-                  <div>
+              <div>
                     <p className="font-semibold">John Doe</p>
                     <p className="text-sm text-muted-foreground">Lead Agent, A.myth Estates</p>
                     <div className="flex gap-4 mt-2">
@@ -137,8 +137,8 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
+                    </div>
+                  </div>
 
           {/* Sidebar */}
           <div className="md:col-span-1">
@@ -192,13 +192,13 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
                       defaultValue={`Hello, I am interested in ${property.title} at ${property.location}. Please provide more information.`}
                     />
                     {state.errors?.message && <p className="text-red-500 text-xs">{state.errors.message.join(', ')}</p>}
-                  </div>
-                  
+              </div>
+
                   <SubmitButton />
 
-                </form>
-              </CardContent>
-            </Card>
+              </form>
+            </CardContent>
+          </Card>
           </div>
         </div>
       </div>

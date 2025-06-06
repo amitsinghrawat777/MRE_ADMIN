@@ -28,7 +28,7 @@ import { useState } from 'react';
 interface AdminPropertiesListProps {
   properties: Property[];
   onEdit: (property: Property) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 export default function AdminPropertiesList({ 

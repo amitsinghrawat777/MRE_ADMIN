@@ -53,10 +53,10 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     setActiveTab('add-edit');
   }, []);
 
-  const handleSaveProperty = async (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => {
+  const handleSaveProperty = async (propertyData: Omit<Property, 'id'>, id?: string) => {
     try {
       if (id) {
-        // Update existing property
+      // Update existing property
         const { id: _, created_at, ...updateData } = propertyData as any;
 
         const { data, error } = await supabase
@@ -71,9 +71,9 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
         setProperties(prev => prev.map(p => (p.id === id ? data : p)));
         toast.success("Property updated", {
           description: `${data.title} has been updated successfully`,
-        });
-      } else {
-        // Add new property
+      });
+    } else {
+      // Add new property
         const { data, error } = await supabase
           .from('properties')
           .insert(propertyData)
@@ -85,10 +85,10 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
         setProperties(prev => [data, ...prev]);
         toast.success("Property added", {
           description: `${data.title} has been added successfully`,
-        });
-      }
-      setActiveTab('properties');
-      setEditingProperty(null);
+      });
+    }
+    setActiveTab('properties');
+    setEditingProperty(null);
       router.refresh();
     } catch (error: any) {
       console.error('Error saving property:', error);
@@ -98,7 +98,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     }
   };
 
-  const handleDeleteProperty = async (id: number) => {
+  const handleDeleteProperty = async (id: string) => {
     try {
       const { error } = await supabase.from('properties').delete().eq('id', id);
 
@@ -106,15 +106,15 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
 
       setProperties(prev => prev.filter(p => p.id !== id));
       toast.success("Property deleted", {
-        description: "The property has been deleted successfully",
-      });
+      description: "The property has been deleted successfully",
+    });
       router.refresh();
     } catch (error: any) {
       console.error('Error deleting property:', error);
       toast.error("Error", {
         description: error.message || "There was an error deleting the property. Please try again.",
       });
-    }
+  }
   };
 
   const handleTabChange = (value: string) => {
@@ -125,7 +125,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
         router.push('/admin-dashboard');
       }
       setActiveTab(value);
-    }
+  }
   };
 
   return (
@@ -181,7 +181,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
 
           <TabsContent value="add-edit" className="pt-4">
             <AdminPropertyForm 
-              property={editingProperty}
+              property={editingProperty} 
               onSave={handleSaveProperty}
               onCancel={() => {
                 setEditingProperty(null);
