@@ -148,7 +148,7 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
         {filteredProperties.map((property: Property) => (
           <Card key={property.id} className="overflow-hidden group border-0 rounded-xl shadow-sm hover:shadow-md transition-all">
             <CardContent className="p-0 relative">
-              <PropertyImageCarousel images={property.images} />
+              <PropertyImageCarousel images={property.images} showThumbnails={false} />
               <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
                 {formatCurrency(property.price)}
               </div>

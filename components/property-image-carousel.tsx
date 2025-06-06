@@ -12,9 +12,10 @@ import "yet-another-react-lightbox/styles.css";
 
 interface PropertyImageCarouselProps {
   images: string[];
+  showThumbnails?: boolean;
 }
 
-export default function PropertyImageCarousel({ images }: PropertyImageCarouselProps) {
+export default function PropertyImageCarousel({ images, showThumbnails = true }: PropertyImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [open, setOpen] = useState(false);
 
@@ -100,7 +101,7 @@ export default function PropertyImageCarousel({ images }: PropertyImageCarouselP
         </div>
 
         {/* Thumbnails */}
-        {images.length > 1 && (
+        {showThumbnails && images.length > 1 && (
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
             {images.map((image, index) => (
               <div

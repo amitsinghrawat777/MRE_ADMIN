@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { submitInquiry } from '@/app/actions/inquiries';
 import { Property } from "@/types/property";
 import PropertyImageCarousel from "@/components/property-image-carousel";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getPaymentLabel } from "@/lib/utils";
 import {
   MapPin, Bed, Bath, Move, Building, Calendar,
   ChevronLeft, Star, Share2, Heart, Mail, Phone, User
@@ -134,12 +134,14 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
               <Card className="mt-4 border-0 shadow-none bg-muted/40">
                 <CardContent className="flex items-center gap-4 p-6">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src="/placeholder-agent.jpg" alt="Agent" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarImage src={property.agent_avatar_url || "/placeholder-agent.jpg"} alt={property.agent_name || "Agent"} />
+                    <AvatarFallback>
+                      {property.agent_name?.split(' ').map(n => n[0]).join('') || 'JD'}
+                    </AvatarFallback>
                   </Avatar>
               <div>
-                    <p className="font-semibold">John Doe</p>
-                    <p className="text-sm text-muted-foreground">Lead Agent, A.myth Estates</p>
+                    <p className="font-semibold">{property.agent_name || 'John Doe'}</p>
+                    <p className="text-sm text-muted-foreground">{property.agent_title || 'Lead Agent, A.myth Estates'}</p>
                     <div className="flex gap-4 mt-2">
                       <Button variant="outline" size="sm"><Phone className="h-4 w-4 mr-2" /> Call</Button>
                       <Button variant="outline" size="sm"><Mail className="h-4 w-4 mr-2" /> Email</Button>
@@ -155,7 +157,9 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
             <Card className="sticky top-24 shadow-lg">
               <CardContent className="p-6">
                 <div className="text-2xl font-bold">{formatCurrency(property.price)}</div>
-                <p className="text-muted-foreground text-sm">Estimated monthly payment</p>
+                <p className="text-muted-foreground text-sm">
+                  {getPaymentLabel(property.status, property.property_type)}
+                </p>
 
                 <Separator className="my-6" />
 

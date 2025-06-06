@@ -11,6 +11,7 @@ import { Property } from '@/types/property';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { formatNumberForInput } from '@/lib/utils';
 
 interface AdminPropertyFormProps {
   property: Property | null;
@@ -54,6 +55,11 @@ export default function AdminPropertyForm({
       setFormData({
         ...DEFAULT_PROPERTY,
         ...property,
+        price: formatNumberForInput(property.price),
+        bedrooms: property.bedrooms?.toString() ?? '',
+        bathrooms: property.bathrooms?.toString() ?? '',
+        sqft: property.sqft?.toString() ?? '',
+        year_built: property.year_built?.toString() ?? '',
       });
     } else {
       setFormData(DEFAULT_PROPERTY);
@@ -62,18 +68,7 @@ export default function AdminPropertyForm({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const numericFields = ['price', 'bedrooms', 'bathrooms', 'sqft', 'year_built'];
-    
-    let parsedValue: string | number | undefined = value;
-
-    if (numericFields.includes(name)) {
-        parsedValue = value === '' ? undefined : parseFloat(value);
-        if (parsedValue && isNaN(parsedValue)) {
-            parsedValue = undefined;
-        }
-    }
-    
-    setFormData(prev => ({ ...prev, [name]: parsedValue }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
   const handleSelectChange = (name: string, value: string) => {
@@ -193,7 +188,7 @@ export default function AdminPropertyForm({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="price">Price (USD) *</Label>
-                <Input id="price" name="price" type="number" value={formData.price || ''} onChange={handleInputChange} placeholder="e.g., 2500000" min="0" required />
+                <Input id="price" name="price" type="text" value={formData.price || ''} onChange={handleInputChange} placeholder="e.g., 2,500,000 or 25 lakh" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="property_type">Property Type *</Label>
@@ -223,23 +218,42 @@ export default function AdminPropertyForm({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="space-y-2">
                   <Label htmlFor="bedrooms">Bedrooms</Label>
-                  <Input id="bedrooms" name="bedrooms" type="number" value={formData.bedrooms || ''} onChange={handleInputChange} placeholder="e.g., 4" min="0" />
+                  <Input id="bedrooms" name="bedrooms" type="text" value={formData.bedrooms || ''} onChange={handleInputChange} placeholder="e.g., 4" />
               </div>
               <div className="space-y-2">
                   <Label htmlFor="bathrooms">Bathrooms</Label>
-                  <Input id="bathrooms" name="bathrooms" type="number" step="0.5" value={formData.bathrooms || ''} onChange={handleInputChange} placeholder="e.g., 3.5" min="0" />
+                  <Input id="bathrooms" name="bathrooms" type="text" value={formData.bathrooms || ''} onChange={handleInputChange} placeholder="e.g., 3.5" />
               </div>
               <div className="space-y-2">
                   <Label htmlFor="sqft">Square Feet</Label>
-                  <Input id="sqft" name="sqft" type="number" value={formData.sqft || ''} onChange={handleInputChange} placeholder="e.g., 3200" min="0" />
+                  <Input id="sqft" name="sqft" type="text" value={formData.sqft || ''} onChange={handleInputChange} placeholder="e.g., 3,200" />
               </div>
               <div className="space-y-2">
                   <Label htmlFor="year_built">Year Built</Label>
-                  <Input id="year_built" name="year_built" type="number" value={formData.year_built || ''} onChange={handleInputChange} placeholder="e.g., 2010" min="1800" max={new Date().getFullYear()} />
+                  <Input id="year_built" name="year_built" type="text" value={formData.year_built || ''} onChange={handleInputChange} placeholder="e.g., 2010" />
                 </div>
               </div>
             </div>
           )}
+              
+          {/* Agent Information */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium">Agent Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="agent_name">Agent Name</Label>
+                <Input id="agent_name" name="agent_name" value={formData.agent_name || ''} onChange={handleInputChange} placeholder="e.g., Jane Doe" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="agent_title">Agent Title</Label>
+                <Input id="agent_title" name="agent_title" value={formData.agent_title || ''} onChange={handleInputChange} placeholder="e.g., Senior Agent" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="agent_avatar_url">Agent Avatar URL</Label>
+              <Input id="agent_avatar_url" name="agent_avatar_url" value={formData.agent_avatar_url || ''} onChange={handleInputChange} placeholder="https://example.com/avatar.jpg" />
+            </div>
+          </div>
           
           {/* Features */}
           <div className="space-y-6">

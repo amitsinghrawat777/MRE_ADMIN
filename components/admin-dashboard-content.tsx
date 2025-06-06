@@ -11,6 +11,24 @@ import { toast } from 'sonner';
 import { Property } from '@/types/property';
 import { createClient } from '@/lib/supabase/client';
 
+const parseNumericValue = (value: any): number | undefined => {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'number') return value;
+  if (typeof value !== 'string') return undefined;
+
+  const cleanedValue = value.toLowerCase().replace(/,/g, '').trim();
+  
+  let num = parseFloat(cleanedValue);
+
+  if (cleanedValue.includes('lakh')) {
+    num *= 100000;
+  } else if (cleanedValue.includes('crore')) {
+    num *= 10000000;
+  }
+
+  return isNaN(num) ? undefined : num;
+};
+
 interface AdminDashboardContentProps {
   userEmail: string | undefined;
   initialProperties: Property[];
@@ -55,9 +73,18 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
 
   const handleSaveProperty = async (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => {
     try {
+      const processedData = {
+        ...propertyData,
+        price: parseNumericValue(propertyData.price) ?? 0,
+        bedrooms: parseNumericValue(propertyData.bedrooms),
+        bathrooms: parseNumericValue(propertyData.bathrooms),
+        sqft: parseNumericValue(propertyData.sqft),
+        year_built: parseNumericValue(propertyData.year_built),
+      };
+      
       if (id) {
       // Update existing property
-        const { id: _, created_at, ...updateData } = propertyData as any;
+        const { id: _, created_at, ...updateData } = processedData as any;
 
         const { data, error } = await supabase
           .from('properties')
@@ -76,7 +103,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
       // Add new property
         const { data, error } = await supabase
           .from('properties')
-          .insert(propertyData)
+          .insert(processedData)
           .select()
           .single();
 

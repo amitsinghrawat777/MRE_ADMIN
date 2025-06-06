@@ -12,5 +12,8 @@ export interface Property {
   property_type: string;
   status: string;
   images: string[];
-  features: string[];
+  features?: string[];
+  agent_name?: string;
+  agent_title?: string;
+  agent_avatar_url?: string;
 }
