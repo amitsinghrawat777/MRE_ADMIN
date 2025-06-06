@@ -98,7 +98,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     }
   };
 
-  const handleDeleteProperty = async (id: string) => {
+  const handleDeleteProperty = async (id: number) => {
     try {
       const { error } = await supabase.from('properties').delete().eq('id', id);
 
