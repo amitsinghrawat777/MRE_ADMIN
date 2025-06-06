@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LockKeyhole, AlertCircle } from "lucide-react";
 import { loginUser } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export function AdminLoginDialog() {
   const [email, setEmail] = useState("");
@@ -25,7 +25,6 @@ export function AdminLoginDialog() {
   const [error, setError] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +36,7 @@ export function AdminLoginDialog() {
       
       if (success) {
         setIsDialogOpen(false);
-        toast({
-          title: "Login successful",
+        toast.success("Login successful", {
           description: "Welcome to the admin dashboard.",
           duration: 3000,
         });

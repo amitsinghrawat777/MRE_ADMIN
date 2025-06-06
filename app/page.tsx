@@ -3,7 +3,25 @@ import Link from "next/link";
 import { ChevronRight, Home, Building2, Award, Sparkles } from "lucide-react";
 import FeaturedProperties from "@/components/featured-properties";
 
-export default function Home() {
+const features = [
+  {
+    icon: Home,
+    title: "Premium Properties",
+    description: "Access to exclusive luxury properties not available on the general market."
+  },
+  {
+    icon: Building2,
+    title: "Expert Guidance",
+    description: "Our team of experienced real estate professionals will guide you through every step."
+  },
+  {
+    icon: Award,
+    title: "Tailored Service",
+    description: "Personalized attention to your specific needs and preferences."
+  }
+];
+
+export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -48,29 +66,16 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose Luxury Estates</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Home className="h-8 w-8 mb-4 text-primary" />,
-                title: "Premium Properties",
-                description: "Access to exclusive luxury properties not available on the general market."
-              },
-              {
-                icon: <Building2 className="h-8 w-8 mb-4 text-primary" />,
-                title: "Expert Guidance",
-                description: "Our team of experienced real estate professionals will guide you through every step."
-              },
-              {
-                icon: <Award className="h-8 w-8 mb-4 text-primary" />,
-                title: "Tailored Service",
-                description: "Personalized attention to your specific needs and preferences."
-              }
-            ].map((feature, index) => (
-              <div key={index} className="flex flex-col items-center text-center p-6 rounded-xl transition-all hover:bg-muted/50">
-                {feature.icon}
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </div>
-            ))}
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div key={index} className="flex flex-col items-center text-center p-6 rounded-xl transition-all hover:bg-muted/50">
+                  <Icon className="h-8 w-8 mb-4 text-primary" />
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -36,13 +36,17 @@ export default function AdminPropertiesList({
   onEdit, 
   onDelete 
 }: AdminPropertiesListProps) {
-  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
 
   const handleDeleteConfirm = () => {
     if (propertyToDelete) {
-      onDelete(propertyToDelete);
+      onDelete(propertyToDelete.id);
       setPropertyToDelete(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setPropertyToDelete(null);
   };
 
   return (
@@ -98,34 +102,14 @@ export default function AdminPropertiesList({
                         Edit
                       </Button>
                       
-                      <AlertDialog open={propertyToDelete === property.id} onOpenChange={(open) => {
-                        if (!open) setPropertyToDelete(null);
-                      }}>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setPropertyToDelete(property.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5 mr-1" />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{property.title}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteConfirm}>
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setPropertyToDelete(property)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        Delete
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -140,6 +124,25 @@ export default function AdminPropertiesList({
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={!!propertyToDelete} onOpenChange={(open) => {
+        if (!open) setPropertyToDelete(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Property</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{propertyToDelete?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
