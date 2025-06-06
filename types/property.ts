@@ -4,10 +4,10 @@ export interface Property {
   description: string;
   price: number;
   location: string;
-  bedrooms: number;
-  bathrooms: number;
-  sqft: number;
-  year_built: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  sqft?: number;
+  year_built?: number;
   property_type: string;
   status: string;
   images: string[];

@@ -15,8 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LockKeyhole, AlertCircle } from "lucide-react";
-import { loginUser } from "@/lib/auth";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 
 export function AdminLoginDialog() {
   const [email, setEmail] = useState("");
@@ -25,30 +25,32 @@ export function AdminLoginDialog() {
   const [error, setError] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    try {
-      const success = await loginUser(email, password);
-      
-      if (success) {
-        setIsDialogOpen(false);
-        toast.success("Login successful", {
-          description: "Welcome to the admin dashboard.",
-          duration: 3000,
-        });
-        router.push("/admin-dashboard");
-      } else {
-        setError("Invalid email or password");
-      }
-    } catch (error) {
-      setError("An error occurred during login");
-    } finally {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
       setIsLoading(false);
+      return;
     }
+
+    setIsLoading(false);
+    setIsDialogOpen(false);
+    toast.success("Login successful", {
+      description: "Welcome to the admin dashboard.",
+      duration: 3000,
+    });
+    router.refresh();
+    router.push("/admin-dashboard");
   };
 
   return (
@@ -72,7 +74,7 @@ export function AdminLoginDialog() {
             Please enter your credentials to access the admin dashboard.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           {error && (
             <div className="bg-destructive/10 p-3 rounded-md flex items-center mb-4 text-sm text-destructive">
               <AlertCircle className="h-4 w-4 mr-2" />
@@ -101,11 +103,6 @@ export function AdminLoginDialog() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              <p>Demo credentials:</p>
-              <p>Email: admin@example.com</p>
-              <p>Password: password123</p>
             </div>
           </div>
           <DialogFooter className="mt-4">

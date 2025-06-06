@@ -144,34 +144,42 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
               <div>
                 <h3 className="text-lg font-medium mb-4">Key Details</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="flex items-center">
-                    <Bed className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Bedrooms</p>
-                      <p className="font-medium">{property.bedrooms}</p>
+                  {property.bedrooms && (
+                    <div className="flex items-center">
+                      <Bed className="h-5 w-5 mr-2 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Bedrooms</p>
+                        <p className="font-medium">{property.bedrooms}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Bath className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Bathrooms</p>
-                      <p className="font-medium">{property.bathrooms}</p>
+                  )}
+                  {property.bathrooms && (
+                    <div className="flex items-center">
+                      <Bath className="h-5 w-5 mr-2 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Bathrooms</p>
+                        <p className="font-medium">{property.bathrooms}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Move className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Square Feet</p>
-                      <p className="font-medium">{property.sqft.toLocaleString()}</p>
+                  )}
+                  {property.sqft && (
+                    <div className="flex items-center">
+                      <Move className="h-5 w-5 mr-2 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Square Feet</p>
+                        <p className="font-medium">{property.sqft.toLocaleString()}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Year Built</p>
-                      <p className="font-medium">{property.year_built}</p>
+                  )}
+                  {property.year_built && (
+                    <div className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Year Built</p>
+                        <p className="font-medium">{property.year_built}</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-center">
                     <HomeIcon className="h-5 w-5 mr-2 text-muted-foreground" />
                     <div>

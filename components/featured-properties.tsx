@@ -1,6 +1,3 @@
-"use client";
-
-import React from "react";
 import Link from "next/link";
 import { 
   Card, 
@@ -10,13 +7,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { MapPin, Bed, Bath, Move, ChevronRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { FEATURED_PROPERTIES } from "@/lib/data";
 import PropertyImageCarousel from "@/components/property-image-carousel";
+import { createClient } from "@/lib/supabase/server";
+import { Property } from "@/types/property";
 
-export default function FeaturedProperties() {
+export default async function FeaturedProperties() {
+  const supabase = createClient();
+  const { data: properties, error } = await supabase
+    .from('properties')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  if (error) {
+    console.error('Error fetching featured properties:', error);
+    return <p className="text-destructive">Could not load featured properties.</p>;
+  }
+
+  if (!properties || properties.length === 0) {
+    return <p>No featured properties available.</p>;
+  }
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-      {FEATURED_PROPERTIES.map((property) => (
+      {properties.map((property: Property) => (
         <Card key={property.id} className="overflow-hidden group border-0 rounded-xl shadow-sm hover:shadow-md transition-all">
           <CardContent className="p-0 relative">
             <PropertyImageCarousel images={property.images} />
@@ -36,18 +50,24 @@ export default function FeaturedProperties() {
               </div>
               
               <div className="flex justify-between text-sm">
-                <span className="flex items-center">
-                  <Bed className="h-4 w-4 mr-1" />
-                  {property.bedrooms} Beds
-                </span>
-                <span className="flex items-center">
-                  <Bath className="h-4 w-4 mr-1" />
-                  {property.bathrooms} Baths
-                </span>
-                <span className="flex items-center">
-                  <Move className="h-4 w-4 mr-1" />
-                  {property.sqft.toLocaleString()} sqft
-                </span>
+                {property.bedrooms && (
+                  <span className="flex items-center">
+                    <Bed className="h-4 w-4 mr-1" />
+                    {property.bedrooms} Beds
+                  </span>
+                )}
+                {property.bathrooms && (
+                  <span className="flex items-center">
+                    <Bath className="h-4 w-4 mr-1" />
+                    {property.bathrooms} Baths
+                  </span>
+                )}
+                {property.sqft && (
+                  <span className="flex items-center">
+                    <Move className="h-4 w-4 mr-1" />
+                    {property.sqft.toLocaleString()} sqft
+                  </span>
+                )}
               </div>
               
               <p className="text-muted-foreground line-clamp-2">

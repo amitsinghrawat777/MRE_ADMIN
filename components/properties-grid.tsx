@@ -19,9 +19,12 @@ import {
   DollarSign
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { ALL_PROPERTIES } from "@/lib/data";
 import PropertyImageCarousel from "@/components/property-image-carousel";
 import { Property } from "@/types/property";
+
+interface PropertiesGridProps {
+  initialProperties: Property[];
+}
 
 // Property type options
 const propertyTypes = [
@@ -32,6 +35,7 @@ const propertyTypes = [
   { value: 'Townhouse', label: 'Townhouse' },
   { value: 'Mansion', label: 'Mansion' },
   { value: 'Chalet', label: 'Chalet' },
+  { value: 'Land', label: 'Land' },
 ];
 
 // Price range options
@@ -43,12 +47,12 @@ const priceRanges = [
   { value: '10000000-100000000', label: 'Over $10M' },
 ];
 
-export default function PropertiesGrid() {
+export default function PropertiesGrid({ initialProperties }: PropertiesGridProps) {
   const [propertyType, setPropertyType] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   
   // Filter properties based on selected filters
-  const filteredProperties = ALL_PROPERTIES.filter(property => {
+  const filteredProperties = initialProperties.filter((property: Property) => {
     // Filter by property type
     if (propertyType !== 'all' && property.property_type !== propertyType) {
       return false;
@@ -102,7 +106,7 @@ export default function PropertiesGrid() {
       
       {/* Properties grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        {filteredProperties.map((property) => (
+        {filteredProperties.map((property: Property) => (
           <Card key={property.id} className="overflow-hidden group border-0 rounded-xl shadow-sm hover:shadow-md transition-all">
             <CardContent className="p-0 relative">
               <PropertyImageCarousel images={property.images} />
@@ -122,18 +126,24 @@ export default function PropertiesGrid() {
                 </div>
                 
                 <div className="flex justify-between text-sm">
-                  <span className="flex items-center">
-                    <Bed className="h-4 w-4 mr-1" />
-                    {property.bedrooms} Beds
-                  </span>
-                  <span className="flex items-center">
-                    <Bath className="h-4 w-4 mr-1" />
-                    {property.bathrooms} Baths
-                  </span>
-                  <span className="flex items-center">
-                    <Move className="h-4 w-4 mr-1" />
-                    {property.sqft.toLocaleString()} sqft
-                  </span>
+                  {property.bedrooms && (
+                    <span className="flex items-center">
+                      <Bed className="h-4 w-4 mr-1" />
+                      {property.bedrooms} Beds
+                    </span>
+                  )}
+                  {property.bathrooms && (
+                    <span className="flex items-center">
+                      <Bath className="h-4 w-4 mr-1" />
+                      {property.bathrooms} Baths
+                    </span>
+                  )}
+                  {property.sqft && (
+                    <span className="flex items-center">
+                      <Move className="h-4 w-4 mr-1" />
+                      {property.sqft.toLocaleString()} sqft
+                    </span>
+                  )}
                 </div>
                 
                 <p className="text-muted-foreground line-clamp-2">

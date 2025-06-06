@@ -11,7 +11,26 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.britannica.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+        port: '',
+        pathname: '/**',
+      },
     ],
+  },
+  webpack: (config) => {
+    config.externals.push({
+      'bufferutil': 'bufferutil',
+      'utf-8-validate': 'utf-8-validate',
+    })
+    return config
   },
 };
 

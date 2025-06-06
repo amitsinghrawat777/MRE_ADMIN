@@ -1,67 +1,37 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { isUserLoggedIn, logoutUser, getUserEmail } from '@/lib/auth';
-import { Building, Plus, LogOut, AlertCircle } from 'lucide-react';
+import { Building, Plus, LogOut } from 'lucide-react';
 import AdminPropertiesList from '@/components/admin-properties-list';
 import AdminPropertyForm from '@/components/admin-property-form';
 import { toast } from 'sonner';
 import { Property } from '@/types/property';
-import { ALL_PROPERTIES } from '@/lib/data';
+import { createClient } from '@/lib/supabase/client';
 
-export default function AdminDashboardContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface AdminDashboardContentProps {
+  userEmail: string | undefined;
+  initialProperties: Property[];
+}
+
+export default function AdminDashboardContent({ userEmail, initialProperties }: AdminDashboardContentProps) {
   const [activeTab, setActiveTab] = useState('properties');
-  const [editingProperty, setEditingProperty] = useState<string | null>(null);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [properties, setProperties] = useState<Property[]>(initialProperties);
   const router = useRouter();
+  const supabase = createClient();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const isLoggedIn = isUserLoggedIn();
-      const email = getUserEmail();
-      
-      setIsAuthenticated(isLoggedIn);
-      setUserEmail(email);
-      setIsLoading(false);
-      
-      if (!isLoggedIn) {
-        router.push('/about');
-        toast.error("Authentication required", {
-          description: "Please login to access the admin dashboard",
-        });
-      }
-    };
-
-    checkAuth();
-    
-    // Initialize properties with a clean copy of the data
-    try {
-      const cleanProperties = ALL_PROPERTIES.map(prop => ({
-        ...prop,
-        images: [...prop.images],
-        features: [...prop.features]
-      }));
-      setProperties(cleanProperties);
-    } catch (error) {
-      console.error('Error initializing properties:', error);
-      setProperties([]);
-    }
-  }, [router]);
-
-  const handleLogout = useCallback(() => {
-    logoutUser();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
     router.push('/');
     toast.success("Logged out successfully", {
       description: "You have been logged out of the admin dashboard",
       duration: 3000,
     });
-  }, [router]);
+  };
 
   const handleAddNewClick = useCallback(() => {
     setEditingProperty(null);
@@ -69,97 +39,73 @@ export default function AdminDashboardContent() {
   }, []);
 
   const handleEditProperty = useCallback((property: Property) => {
-    setEditingProperty(property.id);
+    setEditingProperty(property);
     setActiveTab('add-edit');
   }, []);
 
-  const handleSaveProperty = useCallback((property: Property) => {
+  const handleSaveProperty = async (propertyData: Omit<Property, 'id'>, id?: string) => {
     try {
-      // Create a clean copy of the property
-      const cleanProperty = {
-        ...property,
-        images: [...property.images],
-        features: [...property.features],
-        price: Number(property.price),
-        bedrooms: Number(property.bedrooms),
-        bathrooms: Number(property.bathrooms),
-        sqft: Number(property.sqft),
-        year_built: Number(property.year_built)
-      };
-
-      if (editingProperty) {
+      if (id) {
         // Update existing property
-        setProperties(prevProperties => 
-          prevProperties.map(p => p.id === property.id ? cleanProperty : p)
-        );
+        const { id: _, created_at, ...updateData } = propertyData as any;
+
+        const { data, error } = await supabase
+          .from('properties')
+          .update(updateData)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        setProperties(prev => prev.map(p => (p.id === id ? data : p)));
         toast.success("Property updated", {
-          description: `${property.title} has been updated successfully`,
+          description: `${data.title} has been updated successfully`,
         });
       } else {
         // Add new property
-        const newId = (Math.max(...properties.map(p => parseInt(p.id)), 0) + 1).toString();
-        const newProperty = {
-          ...cleanProperty,
-          id: newId
-        };
-        setProperties(prevProperties => [...prevProperties, newProperty]);
+        const { data, error } = await supabase
+          .from('properties')
+          .insert(propertyData)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setProperties(prev => [data, ...prev]);
         toast.success("Property added", {
-          description: `${property.title} has been added successfully`,
+          description: `${data.title} has been added successfully`,
         });
       }
       setActiveTab('properties');
       setEditingProperty(null);
-    } catch (error) {
+      router.refresh();
+    } catch (error: any) {
       console.error('Error saving property:', error);
       toast.error("Error", {
-        description: "There was an error saving the property. Please try again.",
+        description: error.message || "There was an error saving the property. Please try again.",
       });
     }
-  }, [editingProperty, properties, router]);
+  };
 
-  const handleDeleteProperty = useCallback((id: string) => {
+  const handleDeleteProperty = async (id: string) => {
     try {
-      setProperties(prevProperties => prevProperties.filter(p => p.id !== id));
+      const { error } = await supabase.from('properties').delete().eq('id', id);
+
+      if (error) throw error;
+
+      setProperties(prev => prev.filter(p => p.id !== id));
       toast.success("Property deleted", {
         description: "The property has been deleted successfully",
       });
-    } catch (error) {
+      router.refresh();
+    } catch (error: any) {
       console.error('Error deleting property:', error);
       toast.error("Error", {
-        description: "There was an error deleting the property. Please try again.",
+        description: error.message || "There was an error deleting the property. Please try again.",
       });
     }
-  }, []);
-
-  // Get the current editing property object
-  const currentEditingProperty = editingProperty 
-    ? properties.find(p => p.id === editingProperty) || null
-    : null;
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center pt-20">
-        <div className="animate-pulse text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center pt-20">
-        <div className="text-center max-w-md p-6 rounded-lg bg-muted">
-          <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Authentication Required</h2>
-          <p className="text-muted-foreground mb-4">
-            You need to be logged in to access the admin dashboard.
-          </p>
-          <Button onClick={() => router.push('/about')}>Go to Login</Button>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
     <div className="flex flex-col min-h-screen pt-20 md:pt-24">
@@ -210,9 +156,12 @@ export default function AdminDashboardContent() {
 
           <TabsContent value="add-edit" className="pt-4">
             <AdminPropertyForm 
-              property={currentEditingProperty}
+              property={editingProperty}
               onSave={handleSaveProperty}
-              onCancel={() => setActiveTab('properties')}
+              onCancel={() => {
+                setEditingProperty(null);
+                setActiveTab('properties');
+              }}
             />
           </TabsContent>
         </Tabs>

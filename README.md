@@ -68,17 +68,68 @@ To access the admin dashboard:
 
 ```
 luxury-estates/
-├── app/                    # Next.js 13 app directory
-│   ├── about/             # About page
-│   ├── admin-dashboard/   # Admin dashboard
-│   ├── properties/        # Properties listing
-│   └── layout.tsx         # Root layout
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   └── ...               # Custom components
-├── lib/                   # Utility functions
-├── public/               # Static assets
-└── types/                # TypeScript types
+├── app/
+│   ├── (main)/
+│   │   ├── about/
+│   │   │   └── page.tsx
+│   │   ├── properties/
+│   │   │   ├── [id]/
+│   │   │   │   └── page.tsx
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   ├── admin-dashboard/
+│   │   └── page.tsx
+│   ├── api/
+│   │   └── auth/
+│   │       └── login/
+│   │           └── route.ts
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── not-found.tsx
+├── components/
+│   ├── ui/
+│   │   ├── alert-dialog.tsx
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── dialog.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   ├── sonner.tsx
+│   │   ├── table.tsx
+│   │   ├── tabs.tsx
+│   │   └── textarea.tsx
+│   ├── admin-dashboard-content.tsx
+│   ├── admin-login-dialog.tsx
+│   ├── admin-properties-list.tsx
+│   ├── admin-property-form.tsx
+│   ├── featured-properties.tsx
+│   ├── footer.tsx
+│   ├── header.tsx
+│   ├── mode-toggle.tsx
+│   ├── property-card.tsx
+│   └── theme-provider.tsx
+├── hooks/
+│   └── use-toast.ts
+├── lib/
+│   ├── auth.ts
+│   ├── data.ts
+│   └── utils.ts
+├── public/
+│   └── placeholder.svg
+├── types/
+│   └── property.ts
+├── .eslintrc.json
+├── .gitignore
+├── components.json
+├── middleware.ts
+├── next-env.d.ts
+├── next.config.js
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── README.md
+└── tailwind.config.ts
 ```
 
 ## Key Features Breakdown
@@ -116,13 +167,14 @@ All UI components are built using shadcn/ui and can be customized in the `compon
 
 ## Deployment
 
-The project is configured for static export and can be deployed to various platforms:
+The project can be deployed to any platform that supports Node.js applications (e.g., Vercel, Netlify, AWS).
 
+To build the application for production, run:
 ```bash
 npm run build
 ```
 
-This will create a static export in the `out` directory.
+This will create an optimized production build in the `.next` directory.
 
 ## Contributing
 

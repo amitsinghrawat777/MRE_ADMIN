@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ALL_PROPERTIES } from '@/lib/data';
 import PropertyDetails from '@/components/property-details';
 import { ArrowLeft } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 interface PropertyPageProps {
   params: {
@@ -11,8 +11,13 @@ interface PropertyPageProps {
   };
 }
 
-export function generateMetadata({ params }: PropertyPageProps) {
-  const property = ALL_PROPERTIES.find(p => p.id === params.id);
+export async function generateMetadata({ params }: PropertyPageProps) {
+  const supabase = createClient();
+  const { data: property } = await supabase
+    .from('properties')
+    .select('title, description')
+    .eq('id', params.id)
+    .single();
   
   if (!property) {
     return {
@@ -27,16 +32,15 @@ export function generateMetadata({ params }: PropertyPageProps) {
   };
 }
 
-export function generateStaticParams() {
-  return ALL_PROPERTIES.map((property) => ({
-    id: property.id,
-  }));
-}
-
-export default function PropertyPage({ params }: PropertyPageProps) {
-  const property = ALL_PROPERTIES.find(p => p.id === params.id);
+export default async function PropertyPage({ params }: PropertyPageProps) {
+  const supabase = createClient();
+  const { data: property, error } = await supabase
+    .from('properties')
+    .select('*')
+    .eq('id', params.id)
+    .single();
   
-  if (!property) {
+  if (error || !property) {
     notFound();
   }
   

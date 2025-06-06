@@ -1,29 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/middleware'
+import { type NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
-  // For demo purposes, middleware only checks for token in the dashboard route
-  // In a real application, this should be more robust
-  
-  if (req.nextUrl.pathname.startsWith('/admin-dashboard')) {
-    const token = req.cookies.get('auth_token')?.value;
-    
-    // If no token exists, redirect to login
-    if (!token) {
-      return NextResponse.redirect(new URL('/about', req.url));
-    }
-    
-    // Verify token (commented out since client-side auth is used in this demo)
-    // const isValid = await verifyToken(token);
-    // if (!isValid) {
-    //   return NextResponse.redirect(new URL('/about', req.url));
-    // }
-  }
-  
-  return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  const { supabase, response } = createClient(request)
+
+  // Refresh session if expired - required for Server Components
+  // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-session-with-middleware
+  await supabase.auth.getSession()
+
+  return response
 }
 
-// Only run middleware on the admin dashboard routes
 export const config = {
-  matcher: '/admin-dashboard/:path*',
-};
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
+}
