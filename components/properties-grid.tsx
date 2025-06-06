@@ -1,0 +1,168 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { 
+  Card, 
+  CardContent, 
+  CardFooter
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { 
+  MapPin, 
+  Bed, 
+  Bath, 
+  Move, 
+  ChevronRight,
+  Home as HomeIcon,
+  Building,
+  DollarSign
+} from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { ALL_PROPERTIES } from "@/lib/data";
+import PropertyImageCarousel from "@/components/property-image-carousel";
+import { Property } from "@/types/property";
+
+// Property type options
+const propertyTypes = [
+  { value: 'all', label: 'All Types' },
+  { value: 'Villa', label: 'Villa' },
+  { value: 'Penthouse', label: 'Penthouse' },
+  { value: 'Estate', label: 'Estate' },
+  { value: 'Townhouse', label: 'Townhouse' },
+  { value: 'Mansion', label: 'Mansion' },
+  { value: 'Chalet', label: 'Chalet' },
+];
+
+// Price range options
+const priceRanges = [
+  { value: 'all', label: 'Any Price' },
+  { value: '0-3000000', label: 'Under $3M' },
+  { value: '3000000-5000000', label: '$3M - $5M' },
+  { value: '5000000-10000000', label: '$5M - $10M' },
+  { value: '10000000-100000000', label: 'Over $10M' },
+];
+
+export default function PropertiesGrid() {
+  const [propertyType, setPropertyType] = useState('all');
+  const [priceRange, setPriceRange] = useState('all');
+  
+  // Filter properties based on selected filters
+  const filteredProperties = ALL_PROPERTIES.filter(property => {
+    // Filter by property type
+    if (propertyType !== 'all' && property.property_type !== propertyType) {
+      return false;
+    }
+    
+    // Filter by price range
+    if (priceRange !== 'all') {
+      const [minPrice, maxPrice] = priceRange.split('-').map(Number);
+      if (property.price < minPrice || (maxPrice && property.price > maxPrice)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
+  return (
+    <div>
+      {/* Filter controls */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8 p-4 bg-muted/40 rounded-lg">
+        <div className="flex items-center gap-2">
+          <HomeIcon className="h-4 w-4 text-muted-foreground" />
+          <select 
+            className="bg-background border rounded-md text-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+          >
+            {propertyTypes.map(type => (
+              <option key={type.value} value={type.value}>{type.label}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <select 
+            className="bg-background border rounded-md text-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            value={priceRange}
+            onChange={(e) => setPriceRange(e.target.value)}
+          >
+            {priceRanges.map(range => (
+              <option key={range.value} value={range.value}>{range.label}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="ml-auto text-sm text-muted-foreground self-center">
+          {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} found
+        </div>
+      </div>
+      
+      {/* Properties grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {filteredProperties.map((property) => (
+          <Card key={property.id} className="overflow-hidden group border-0 rounded-xl shadow-sm hover:shadow-md transition-all">
+            <CardContent className="p-0 relative">
+              <PropertyImageCarousel images={property.images} />
+              <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                {formatCurrency(property.price)}
+              </div>
+            </CardContent>
+            
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xl font-semibold line-clamp-1">{property.title}</h3>
+                  <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 mr-1" />
+                    {property.location}
+                  </div>
+                </div>
+                
+                <div className="flex justify-between text-sm">
+                  <span className="flex items-center">
+                    <Bed className="h-4 w-4 mr-1" />
+                    {property.bedrooms} Beds
+                  </span>
+                  <span className="flex items-center">
+                    <Bath className="h-4 w-4 mr-1" />
+                    {property.bathrooms} Baths
+                  </span>
+                  <span className="flex items-center">
+                    <Move className="h-4 w-4 mr-1" />
+                    {property.sqft.toLocaleString()} sqft
+                  </span>
+                </div>
+                
+                <p className="text-muted-foreground line-clamp-2">
+                  {property.description}
+                </p>
+              </div>
+            </CardContent>
+            
+            <CardFooter className="px-6 pb-6 pt-0">
+              <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <Link href={`/properties/${property.id}`}>
+                  View Details
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+      
+      {filteredProperties.length === 0 && (
+        <div className="text-center py-20">
+          <Building className="h-12 w-12 mx-auto text-muted-foreground" />
+          <h3 className="mt-4 text-xl font-medium">No properties found</h3>
+          <p className="mt-2 text-muted-foreground">
+            Try changing your filters to see more results
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
