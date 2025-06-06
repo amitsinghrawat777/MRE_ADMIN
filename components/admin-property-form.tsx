@@ -7,30 +7,47 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, X, Upload, Loader2 } from 'lucide-react';
-import { Property } from '@/types/property';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { formatNumberForInput } from '@/lib/utils';
+import type { Property, PropertyFormData } from '@/types/property';
 
 interface AdminPropertyFormProps {
   property: Property | null;
-  onSave: (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => Promise<void>;
+  onSave: (propertyData: PropertyFormData, id?: number) => Promise<void>;
   onCancel: () => void;
 }
 
-const DEFAULT_PROPERTY: Omit<Property, 'id' | 'created_at'> = {
+const DEFAULT_PROPERTY: PropertyFormData = {
   title: '',
   description: '',
-  price: 0,
+  price: '',
   location: '',
-  property_type: 'Villa',
+  property_type: 'House',
   status: 'For Sale',
   images: [],
   features: [],
+  bedrooms: '',
+  bathrooms: '',
+  sqft: '',
+  year_built: '',
+  agent_name: '',
+  agent_title: '',
+  agent_avatar_url: '',
 };
 
-const PROPERTY_TYPES = ["Villa", "Penthouse", "Estate", "Townhouse", "Chalet", "Mansion", "Land"];
+const PROPERTY_TYPES = [
+  "House", 
+  "Flat / Apartment", 
+  "Villa", 
+  "Farmhouse",
+  "Penthouse", 
+  "Townhouse", 
+  "Mansion", 
+  "Chalet", 
+  "Plot / Land"
+];
 const STATUS_OPTIONS = ["For Sale", "For Rent", "Sold", "Rented"];
 
 export default function AdminPropertyForm({ 
@@ -40,7 +57,7 @@ export default function AdminPropertyForm({
 }: AdminPropertyFormProps) {
   const isEditing = !!property;
   
-  const [formData, setFormData] = useState<Omit<Property, 'id' | 'created_at'>>({
+  const [formData, setFormData] = useState<PropertyFormData>({
     ...DEFAULT_PROPERTY,
     ...(property || {}),
   });
@@ -73,14 +90,14 @@ export default function AdminPropertyForm({
   
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => {
-      const newState: Partial<Property> = { ...prev, [name]: value };
-      if (name === 'property_type' && value === 'Land') {
-        newState.bedrooms = undefined;
-        newState.bathrooms = undefined;
-        newState.sqft = undefined;
-        newState.year_built = undefined;
+      const newState: Partial<PropertyFormData> = { ...prev, [name]: value };
+      if (name === 'property_type' && (value === 'Land' || value === 'Plot / Land')) {
+        newState.bedrooms = '';
+        newState.bathrooms = '';
+        newState.sqft = '';
+        newState.year_built = '';
       }
-      return newState as Omit<Property, 'id' | 'created_at'>;
+      return newState as PropertyFormData;
     });
   };
 

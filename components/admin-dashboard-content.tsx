@@ -8,7 +8,7 @@ import { Building, Plus, LogOut, Mail } from 'lucide-react';
 import AdminPropertiesList from '@/components/admin-properties-list';
 import AdminPropertyForm from '@/components/admin-property-form';
 import { toast } from 'sonner';
-import { Property } from '@/types/property';
+import { Property, PropertyFormData } from '@/types/property';
 import { createClient } from '@/lib/supabase/client';
 
 const parseNumericValue = (value: any): number | undefined => {
@@ -71,7 +71,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     setActiveTab('add-edit');
   }, []);
 
-  const handleSaveProperty = async (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => {
+  const handleSaveProperty = async (propertyData: PropertyFormData, id?: number) => {
     try {
       const processedData = {
         ...propertyData,

@@ -30,13 +30,15 @@ interface PropertiesGridProps {
 // Property type options
 const propertyTypes = [
   { value: 'all', label: 'All Types' },
+  { value: 'House', label: 'House' },
+  { value: 'Flat / Apartment', label: 'Flat / Apartment' },
   { value: 'Villa', label: 'Villa' },
+  { value: 'Farmhouse', label: 'Farmhouse' },
   { value: 'Penthouse', label: 'Penthouse' },
-  { value: 'Estate', label: 'Estate' },
   { value: 'Townhouse', label: 'Townhouse' },
   { value: 'Mansion', label: 'Mansion' },
   { value: 'Chalet', label: 'Chalet' },
-  { value: 'Land', label: 'Land' },
+  { value: 'Plot / Land', label: 'Plot / Land' },
 ];
 
 // Price range options
