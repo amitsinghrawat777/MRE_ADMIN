@@ -53,7 +53,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     setActiveTab('add-edit');
   }, []);
 
-  const handleSaveProperty = async (propertyData: Omit<Property, 'id'>, id?: string) => {
+  const handleSaveProperty = async (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => {
     try {
       if (id) {
         // Update existing property
