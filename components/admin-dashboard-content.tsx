@@ -53,10 +53,10 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     setActiveTab('add-edit');
   }, []);
 
-  const handleSaveProperty = async (propertyData: Omit<Property, 'id'>, id?: string) => {
+  const handleSaveProperty = async (propertyData: Omit<Property, 'id' | 'created_at'>, id?: number) => {
     try {
       if (id) {
-      // Update existing property
+        // Update existing property
         const { id: _, created_at, ...updateData } = propertyData as any;
 
         const { data, error } = await supabase
@@ -72,8 +72,8 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
         toast.success("Property updated", {
           description: `${data.title} has been updated successfully`,
       });
-    } else {
-      // Add new property
+      } else {
+        // Add new property
         const { data, error } = await supabase
           .from('properties')
           .insert(propertyData)
@@ -86,9 +86,9 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
         toast.success("Property added", {
           description: `${data.title} has been added successfully`,
       });
-    }
-    setActiveTab('properties');
-    setEditingProperty(null);
+      }
+      setActiveTab('properties');
+      setEditingProperty(null);
       router.refresh();
     } catch (error: any) {
       console.error('Error saving property:', error);
@@ -98,7 +98,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
     }
   };
 
-  const handleDeleteProperty = async (id: string) => {
+  const handleDeleteProperty = async (id: number) => {
     try {
       const { error } = await supabase.from('properties').delete().eq('id', id);
 
