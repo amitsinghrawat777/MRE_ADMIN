@@ -44,6 +44,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
     notFound();
   }
   
+  const serializableProperty = {
+    ...property,
+    created_at: property.created_at.toString(),
+  };
+
   return (
     <div className="flex flex-col min-h-screen pt-20 md:pt-24">
       <div className="container mx-auto px-4 py-8">
@@ -54,7 +59,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
           </Link>
         </Button>
         
-        <PropertyDetails property={property} />
+        <PropertyDetails property={serializableProperty} />
       </div>
     </div>
   );

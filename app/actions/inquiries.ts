@@ -4,6 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
+type InquiryState = {
+  message: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+    phone?: string[];
+    message?: string[];
+    propertyId?: string[];
+  };
+  success?: boolean;
+};
+
 const inquirySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),
@@ -12,7 +24,7 @@ const inquirySchema = z.object({
   propertyId: z.string().regex(/^\d+$/, "Invalid Property ID"),
 });
 
-export async function submitInquiry(prevState: any, formData: FormData) {
+export async function submitInquiry(prevState: InquiryState, formData: FormData): Promise<InquiryState> {
   const supabase = createClient();
 
   const validatedFields = inquirySchema.safeParse({
@@ -26,7 +38,8 @@ export async function submitInquiry(prevState: any, formData: FormData) {
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Validation failed.'
+      message: 'Validation failed.',
+      success: false
     }
   }
 
@@ -43,7 +56,8 @@ export async function submitInquiry(prevState: any, formData: FormData) {
   if (error) {
     console.error('Error submitting inquiry:', error);
     return {
-      message: 'Database error: Could not submit inquiry.'
+      message: 'Database error: Could not submit inquiry.',
+      success: false
     }
   }
 

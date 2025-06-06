@@ -166,22 +166,22 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
                 
                 <div className="flex justify-between text-sm">
                   {property.bedrooms && (
-                    <span className="flex items-center">
-                      <Bed className="h-4 w-4 mr-1" />
-                      {property.bedrooms} Beds
-                    </span>
+                  <span className="flex items-center">
+                    <Bed className="h-4 w-4 mr-1" />
+                    {property.bedrooms} Beds
+                  </span>
                   )}
                   {property.bathrooms && (
-                    <span className="flex items-center">
-                      <Bath className="h-4 w-4 mr-1" />
-                      {property.bathrooms} Baths
-                    </span>
+                  <span className="flex items-center">
+                    <Bath className="h-4 w-4 mr-1" />
+                    {property.bathrooms} Baths
+                  </span>
                   )}
                   {property.sqft && (
-                    <span className="flex items-center">
-                      <Move className="h-4 w-4 mr-1" />
-                      {property.sqft.toLocaleString()} sqft
-                    </span>
+                  <span className="flex items-center">
+                    <Move className="h-4 w-4 mr-1" />
+                    {property.sqft.toLocaleString()} sqft
+                  </span>
                   )}
                 </div>
                 

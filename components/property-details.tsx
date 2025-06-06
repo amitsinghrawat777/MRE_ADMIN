@@ -23,7 +23,17 @@ interface PropertyDetailsProps {
   property: Property;
 }
 
-const initialState = {
+const initialState: {
+  message: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+    phone?: string[];
+    message?: string[];
+    propertyId?: string[];
+  };
+  success?: boolean;
+} = {
   message: '',
   errors: {},
   success: false,
@@ -193,7 +203,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
                     />
                     {state.errors?.message && <p className="text-red-500 text-xs">{state.errors.message.join(', ')}</p>}
               </div>
-
+              
                   <SubmitButton />
 
               </form>

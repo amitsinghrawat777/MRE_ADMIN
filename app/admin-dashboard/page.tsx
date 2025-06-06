@@ -28,5 +28,10 @@ export default async function AdminDashboardPage() {
     // Handle error appropriately
   }
 
-  return <AdminDashboardContent userEmail={user.email} initialProperties={properties || []} />;
+  const serializableProperties = (properties || []).map(p => ({
+    ...p,
+    created_at: p.created_at.toString(),
+  }));
+
+  return <AdminDashboardContent userEmail={user.email} initialProperties={serializableProperties} />;
 }

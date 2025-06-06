@@ -28,7 +28,7 @@ import { useState } from 'react';
 interface AdminPropertiesListProps {
   properties: Property[];
   onEdit: (property: Property) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export default function AdminPropertiesList({ 
@@ -102,14 +102,14 @@ export default function AdminPropertiesList({
                         Edit
                       </Button>
                       
-                      <Button
-                        variant="destructive"
-                        size="sm"
+                          <Button
+                            variant="destructive"
+                            size="sm"
                         onClick={() => setPropertyToDelete(property)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-1" />
-                        Delete
-                      </Button>
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                            Delete
+                          </Button>
                     </div>
                   </TableCell>
                 </TableRow>
