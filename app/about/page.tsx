@@ -1,14 +1,27 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import { AdminLoginDialog } from "@/components/admin-login-dialog";
-import { User, Building, Award, MapPin } from "lucide-react";
+import { User, Building, Award, MapPin, ArrowRight } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: 'About Us | Luxury Estates',
+  title: 'About Us | A.myth Estates',
   description: 'Learn about Luxury Estates and our commitment to exceptional real estate services',
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const supabase = createClient();
+  const { data: leadershipTeam, error } = await supabase
+    .from('team')
+    .select('*')
+    .eq('team_type', 'Leadership')
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching team members:', error);
+  }
+
   return (
     <div className="flex flex-col min-h-screen pt-20 md:pt-24">
       {/* Hero Section */}
@@ -94,54 +107,46 @@ export default function AboutPage() {
       </section>
 
       {/* Our Team Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold">Our Leadership Team</h2>
-            <p className="mt-4 text-muted-foreground">
-              Meet the experts behind Luxury Estates
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Alexandra Reynolds",
-                title: "Founder & CEO",
-                image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600",
-                bio: "With over 25 years of experience in luxury real estate, Alexandra founded Luxury Estates to provide exceptional service to discerning clients."
-              },
-              {
-                name: "Michael Chen",
-                title: "Head of Property Acquisitions",
-                image: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=600",
-                bio: "Michael has an unparalleled ability to identify exceptional properties and negotiate favorable terms for our clients."
-              },
-              {
-                name: "Sophia Martinez",
-                title: "Director of Client Relations",
-                image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=600",
-                bio: "Sophia ensures that every client interaction exceeds expectations, providing personalized service throughout the entire process."
-              }
-            ].map((person, index) => (
-              <div key={index} className="flex flex-col items-center text-center">
-                <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden">
-                  <Image
-                    src={person.image}
-                    alt={person.name}
-                    fill
-                    className="object-cover"
-                    sizes="128px"
-                  />
+      {leadershipTeam && leadershipTeam.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold">Our Leadership Team</h2>
+              <p className="mt-4 text-muted-foreground">
+                Meet the experts behind Luxury Estates
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {leadershipTeam.map((person) => (
+                <div key={person.id} className="flex flex-col items-center text-center">
+                  <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden">
+                    <Image
+                      src={person.avatar_url || ''}
+                      alt={person.name}
+                      fill
+                      className="object-cover"
+                      sizes="128px"
+                    />
+                  </div>
+                  <h3 className="text-xl font-semibold">{person.name}</h3>
+                  <p className="text-primary text-sm mb-2">{person.role}</p>
+                  <p className="text-sm text-muted-foreground">{person.bio}</p>
                 </div>
-                <h3 className="text-xl font-semibold">{person.name}</h3>
-                <p className="text-primary text-sm mb-2">{person.title}</p>
-                <p className="text-sm text-muted-foreground">{person.bio}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+            
+            <div className="mt-16 text-center">
+              <Button asChild variant="secondary">
+                <Link href="/developers">
+                  View Our Development Team
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Contact Section */}
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">

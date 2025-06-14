@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { renderIcon, IconName } from '@/lib/icons';
 
 interface PropertyDetailsProps {
   property: Property;
@@ -50,6 +51,14 @@ function SubmitButton() {
 
 export default function PropertyDetails({ property }: PropertyDetailsProps) {
   const [state, formAction] = useFormState(submitInquiry, initialState);
+
+  const highlights = [];
+  if (property.bedrooms) highlights.push({ icon: 'Bed' as IconName, text: `${property.bedrooms} Beds` });
+  if (property.bathrooms) highlights.push({ icon: 'Bath' as IconName, text: `${property.bathrooms} Baths` });
+  if (property.sqft) highlights.push({ icon: 'Ruler' as IconName, text: `${property.sqft.toLocaleString()} sqft` });
+  if (property.property_type) highlights.push({ icon: 'Building' as IconName, text: property.property_type });
+
+  const allHighlights = [...highlights, ...(property.key_points || [])];
 
   useEffect(() => {
     if (state.message) {
@@ -91,34 +100,25 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
         </div>
       </div>
 
-              <div className="mt-6 flex flex-wrap gap-4 text-center">
-                {property.bedrooms && (
-                  <div className="flex-1 bg-muted/40 p-3 rounded-lg">
-                    <Bed className="h-6 w-6 mx-auto text-primary" />
-                    <p className="mt-1 text-sm font-medium">{property.bedrooms} Beds</p>
-        </div>
-                )}
-                {property.bathrooms && (
-                  <div className="flex-1 bg-muted/40 p-3 rounded-lg">
-                    <Bath className="h-6 w-6 mx-auto text-primary" />
-                    <p className="mt-1 text-sm font-medium">{property.bathrooms} Baths</p>
-        </div>
-                )}
-                {property.sqft && (
-                  <div className="flex-1 bg-muted/40 p-3 rounded-lg">
-                    <Move className="h-6 w-6 mx-auto text-primary" />
-                    <p className="mt-1 text-sm font-medium">{property.sqft.toLocaleString()} sqft</p>
-      </div>
-                )}
-                {property.property_type && (
-                  <div className="flex-1 bg-muted/40 p-3 rounded-lg">
-                    <Building className="h-6 w-6 mx-auto text-primary" />
-                    <p className="mt-1 text-sm font-medium">{property.property_type}</p>
-          </div>
-                )}
-      </div>
-
               <Separator className="my-8" />
+
+              {/* New Highlights Section */}
+              {allHighlights.length > 0 && (
+                <div>
+                  <h2 className="text-2xl font-semibold">Property Highlights</h2>
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {allHighlights.map((highlight, index) => (
+                      <div key={index} className="flex items-center gap-3 bg-muted/40 p-3 rounded-lg">
+                        <div className="flex-shrink-0">
+                          {renderIcon(highlight.icon as IconName, { className: "h-6 w-6 text-primary" })}
+                        </div>
+                        <span className="text-sm font-medium">{highlight.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Separator className="my-8" />
+                </div>
+              )}
 
               <div>
                 <h2 className="text-2xl font-semibold">Description</h2>

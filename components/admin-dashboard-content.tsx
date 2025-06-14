@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building, Plus, LogOut, Mail } from 'lucide-react';
+import { Building, Plus, LogOut, Mail, Users } from 'lucide-react';
 import AdminPropertiesList from '@/components/admin-properties-list';
 import AdminPropertyForm from '@/components/admin-property-form';
+import AdminInquiriesList from '@/components/admin/admin-inquiries-list';
+import AdminTeamList from '@/components/admin-team-list';
+import AdminTeamForm from '@/components/admin-team-form';
 import { toast } from 'sonner';
 import { Property, PropertyFormData } from '@/types/property';
+import { Inquiry } from '@/types/inquiry';
+import { TeamMember, TeamMemberFormData } from '@/types/team';
 import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 const parseNumericValue = (value: any): number | undefined => {
   if (value === null || value === undefined || value === '') return undefined;
@@ -32,24 +37,22 @@ const parseNumericValue = (value: any): number | undefined => {
 interface AdminDashboardContentProps {
   userEmail: string | undefined;
   initialProperties: Property[];
+  initialInquiries: Inquiry[];
+  initialTeamMembers: TeamMember[];
 }
 
-export default function AdminDashboardContent({ userEmail, initialProperties }: AdminDashboardContentProps) {
+export default function AdminDashboardContent({ userEmail, initialProperties, initialInquiries, initialTeamMembers }: AdminDashboardContentProps) {
   const [activeTab, setActiveTab] = useState('properties');
+  const [view, setView] = useState<'list' | 'form' | 'team_form'>('list');
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  
   const [properties, setProperties] = useState<Property[]>(initialProperties);
-  const router = useRouter();
-  const pathname = usePathname();
-  const supabase = createClient();
+  const [inquiries, setInquiries] = useState<Inquiry[]>(initialInquiries);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
 
-  useEffect(() => {
-    if (pathname === '/admin/inquiries') {
-      setActiveTab('inquiries');
-    } else if (activeTab === 'inquiries') {
-      // If we navigate away from inquiries, default to properties
-      setActiveTab('properties');
-    }
-  }, [pathname, activeTab]);
+  const router = useRouter();
+  const supabase = createClient();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -63,12 +66,17 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
 
   const handleAddNewClick = useCallback(() => {
     setEditingProperty(null);
-    setActiveTab('add-edit');
+    setView('form');
   }, []);
 
   const handleEditProperty = useCallback((property: Property) => {
     setEditingProperty(property);
-    setActiveTab('add-edit');
+    setView('form');
+  }, []);
+
+  const handleCancelForm = useCallback(() => {
+    setEditingProperty(null);
+    setView('list');
   }, []);
 
   const handleSaveProperty = async (propertyData: PropertyFormData, id?: number) => {
@@ -114,7 +122,7 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
           description: `${data.title} has been added successfully`,
       });
     }
-    setActiveTab('properties');
+    setView('list');
     setEditingProperty(null);
       router.refresh();
     } catch (error: any) {
@@ -144,14 +152,72 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
   }
   };
 
-  const handleTabChange = (value: string) => {
-    if (value === 'inquiries') {
-      router.push('/admin/inquiries');
-    } else {
-      if (pathname === '/admin/inquiries') {
-        router.push('/admin-dashboard');
+  const handleDeleteInquiry = async (id: number) => {
+    try {
+      const { error } = await supabase.from('inquiries').delete().eq('id', id);
+
+      if (error) throw error;
+
+      setInquiries(prev => prev.filter(i => i.id !== id));
+      toast.success("Inquiry deleted", {
+        description: "The inquiry has been deleted successfully",
+      });
+      router.refresh();
+    } catch (error: any) {
+      console.error('Error deleting inquiry:', error);
+      toast.error("Error", {
+        description: error.message || "There was an error deleting the inquiry. Please try again.",
+      });
+  }
+  };
+
+  const handleAddNewMemberClick = useCallback(() => {
+    setEditingMember(null);
+    setView('team_form');
+  }, []);
+
+  const handleEditMember = useCallback((member: TeamMember) => {
+    setEditingMember(member);
+    setView('team_form');
+  }, []);
+
+  const handleCancelTeamForm = useCallback(() => {
+    setEditingMember(null);
+    setView('list');
+  }, []);
+  
+  const handleSaveTeamMember = async (memberData: TeamMemberFormData, id?: number) => {
+    try {
+      if (id) {
+        // Exclude protected fields before updating
+        const { id: memberId, created_at, ...updateData } = memberData as any;
+        const { data, error } = await supabase.from('team').update(updateData).eq('id', id).select().single();
+        if (error) throw error;
+        setTeamMembers(prev => prev.map(m => (m.id === id ? data : m)));
+        toast.success("Team member updated");
+      } else {
+        const { data, error } = await supabase.from('team').insert(memberData).select().single();
+        if (error) throw error;
+        setTeamMembers(prev => [data, ...prev]);
+        toast.success("Team member added");
       }
-      setActiveTab(value);
+      setView('list');
+      setEditingMember(null);
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save team member.");
+    }
+  };
+  
+  const handleDeleteTeamMember = async (id: number) => {
+    try {
+      const { error } = await supabase.from('team').delete().eq('id', id);
+      if (error) throw error;
+      setTeamMembers(prev => prev.filter(m => m.id !== id));
+      toast.success("Team member deleted");
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete team member.");
   }
   };
 
@@ -162,7 +228,12 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
             <p className="text-muted-foreground">
-              Logged in as: {userEmail}
+              {view === 'form' 
+                ? (editingProperty ? 'Editing Property' : 'Adding New Property')
+                : view === 'team_form'
+                ? (editingMember ? 'Editing Team Member' : 'Adding New Team Member')
+                : `Logged in as: ${userEmail}`
+              }
             </p>
           </div>
           <div className="flex mt-4 md:mt-0 space-x-3">
@@ -173,20 +244,21 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
+        {view === 'list' ? (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between items-center mb-6">
             <TabsList>
               <TabsTrigger value="properties" className="flex items-center">
                 <Building className="h-4 w-4 mr-2" />
                 Properties
               </TabsTrigger>
-               <TabsTrigger value="inquiries" className="flex items-center">
-                <Mail className="h-4 w-4 mr-2" />
-                Inquiries
+                 <TabsTrigger value="inquiries" className="flex items-center">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Inquiries
               </TabsTrigger>
-              <TabsTrigger value="add-edit" className="flex items-center">
-                <Plus className="h-4 w-4 mr-2" />
-                {editingProperty ? 'Edit Property' : 'Add Property'}
+              <TabsTrigger value="team" className="flex items-center">
+                <Users className="h-4 w-4 mr-2" />
+                Team
               </TabsTrigger>
             </TabsList>
             
@@ -194,6 +266,12 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
               <Button onClick={handleAddNewClick} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add New Property
+              </Button>
+            )}
+            {activeTab === 'team' && (
+              <Button onClick={handleAddNewMemberClick} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Team Member
               </Button>
             )}
           </div>
@@ -206,17 +284,34 @@ export default function AdminDashboardContent({ userEmail, initialProperties }: 
             />
           </TabsContent>
 
-          <TabsContent value="add-edit" className="pt-4">
+            <TabsContent value="inquiries" className="pt-4">
+              <AdminInquiriesList 
+                inquiries={inquiries}
+                onDelete={handleDeleteInquiry}
+              />
+            </TabsContent>
+
+            <TabsContent value="team" className="pt-4">
+              <AdminTeamList 
+                teamMembers={teamMembers}
+                onEdit={handleEditMember}
+                onDelete={handleDeleteTeamMember}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : view === 'form' ? (
             <AdminPropertyForm 
               property={editingProperty} 
               onSave={handleSaveProperty}
-              onCancel={() => {
-                setEditingProperty(null);
-                setActiveTab('properties');
-              }}
+            onCancel={handleCancelForm}
+          />
+        ) : (
+          <AdminTeamForm
+            member={editingMember}
+            onSave={handleSaveTeamMember}
+            onCancel={handleCancelTeamForm}
             />
-          </TabsContent>
-        </Tabs>
+        )}
       </div>
     </div>
   );

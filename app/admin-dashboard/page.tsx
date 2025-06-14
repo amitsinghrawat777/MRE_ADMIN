@@ -18,20 +18,54 @@ export default async function AdminDashboardPage() {
     redirect('/about');
   }
 
-  const { data: properties, error } = await supabase
+  const { data: properties, error: propertiesError } = await supabase
     .from('properties')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching properties:', error);
+  if (propertiesError) {
+    console.error('Error fetching properties:', propertiesError);
     // Handle error appropriately
   }
 
-  const serializableProperties = (properties || []).map(p => ({
-    ...p,
-    created_at: p.created_at.toString(),
-  }));
+  const { data: inquiries, error: inquiriesError } = await supabase
+    .from("inquiries")
+    .select(`
+      *,
+      properties (
+        id,
+        title
+      )
+    `)
+    .order("created_at", { ascending: false });
 
-  return <AdminDashboardContent userEmail={user.email} initialProperties={serializableProperties} />;
+  if (inquiriesError) {
+    console.error("Error fetching inquiries:", inquiriesError);
+    // Handle error appropriately
+  }
+
+  const { data: team, error: teamError } = await supabase
+    .from('team')
+    .select('*')
+    .order('display_order', { ascending: true });
+
+  if (teamError) {
+    console.error("Error fetching team:", teamError);
+    // Handle error appropriately
+  }
+
+  const serializeData = (data: any[] | null) => {
+    if (!data) return [];
+    return data.map(item => ({
+      ...item,
+      created_at: item.created_at.toString(),
+    }));
+  };
+
+  return <AdminDashboardContent 
+    userEmail={user.email} 
+    initialProperties={serializeData(properties)} 
+    initialInquiries={serializeData(inquiries)}
+    initialTeamMembers={serializeData(team)}
+  />;
 }

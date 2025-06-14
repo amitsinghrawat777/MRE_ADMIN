@@ -11,7 +11,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { formatNumberForInput } from '@/lib/utils';
-import type { Property, PropertyFormData } from '@/types/property';
+import type { Property, PropertyFormData, KeyPoint } from '@/types/property';
+import IconPicker from '@/components/icon-picker';
+import { IconName, renderIcon } from '@/lib/icons';
 
 interface AdminPropertyFormProps {
   property: Property | null;
@@ -28,6 +30,7 @@ const DEFAULT_PROPERTY: PropertyFormData = {
   status: 'For Sale',
   images: [],
   features: [],
+  key_points: [],
   bedrooms: '',
   bathrooms: '',
   sqft: '',
@@ -49,6 +52,8 @@ const PROPERTY_TYPES = [
   "Plot / Land"
 ];
 const STATUS_OPTIONS = ["For Sale", "For Rent", "Sold", "Rented"];
+
+const MAX_CUSTOM_KEY_POINTS = 5;
 
 export default function AdminPropertyForm({ 
   property, 
@@ -112,6 +117,28 @@ export default function AdminPropertyForm({
     setFormData(prev => ({ ...prev, features: prev.features?.filter((_, i) => i !== index) || [] }));
   };
 
+  const handleKeyPointChange = (index: number, field: keyof KeyPoint, value: string) => {
+    setFormData(prev => {
+      const newKeyPoints = [...(prev.key_points || [])];
+      newKeyPoints[index] = { ...newKeyPoints[index], [field]: value };
+      return { ...prev, key_points: newKeyPoints };
+    });
+  };
+
+  const handleAddKeyPoint = () => {
+    setFormData(prev => ({
+      ...prev,
+      key_points: [...(prev.key_points || []), { icon: 'Star', text: '' }]
+    }));
+  };
+
+  const handleRemoveKeyPoint = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      key_points: prev.key_points?.filter((_, i) => i !== index) || []
+    }));
+  };
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
       return;
@@ -167,7 +194,14 @@ export default function AdminPropertyForm({
     }
   };
 
-  const isLand = formData.property_type === 'Land';
+  const isLand = formData.property_type === 'Plot / Land' || formData.property_type === 'Land';
+
+  const fixedHighlights = [
+    { name: 'bedrooms', label: 'Bedrooms', icon: 'Bed' as IconName },
+    { name: 'bathrooms', label: 'Bathrooms', icon: 'Bath' as IconName },
+    { name: 'sqft', label: 'Square Feet', icon: 'Ruler' as IconName },
+    { name: 'year_built', label: 'Year Built', icon: 'Calendar' as IconName },
+  ];
 
   return (
     <Card>
@@ -204,7 +238,7 @@ export default function AdminPropertyForm({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="price">Price (USD) *</Label>
+                <Label htmlFor="price">Price (INR) *</Label>
                 <Input id="price" name="price" type="text" value={formData.price || ''} onChange={handleInputChange} placeholder="e.g., 2,500,000 or 25 lakh" required />
               </div>
               <div className="space-y-2">
@@ -230,29 +264,34 @@ export default function AdminPropertyForm({
           
           {/* Property Details */}
           {!isLand && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Property Details</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="space-y-2">
-                  <Label htmlFor="bedrooms">Bedrooms</Label>
-                  <Input id="bedrooms" name="bedrooms" type="text" value={formData.bedrooms || ''} onChange={handleInputChange} placeholder="e.g., 4" />
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Property Highlights</h3>
+              
+              {/* Fixed Highlights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {fixedHighlights.map(item => (
+                  <div key={item.name} className="flex items-center gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                      {renderIcon(item.icon, { className: "h-5 w-5 text-muted-foreground" })}
+                    </div>
+                    <div className="flex-grow space-y-1">
+                      <Label htmlFor={item.name}>{item.label}</Label>
+                      <Input
+                        id={item.name}
+                        name={item.name}
+                        type="text"
+                        value={formData[item.name as keyof PropertyFormData] as string || ''}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 4"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-2">
-                  <Label htmlFor="bathrooms">Bathrooms</Label>
-                  <Input id="bathrooms" name="bathrooms" type="text" value={formData.bathrooms || ''} onChange={handleInputChange} placeholder="e.g., 3.5" />
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="sqft">Square Feet</Label>
-                  <Input id="sqft" name="sqft" type="text" value={formData.sqft || ''} onChange={handleInputChange} placeholder="e.g., 3,200" />
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="year_built">Year Built</Label>
-                  <Input id="year_built" name="year_built" type="text" value={formData.year_built || ''} onChange={handleInputChange} placeholder="e.g., 2010" />
-                </div>
-              </div>
+              <Separator />
             </div>
           )}
-              
+          
           {/* Agent Information */}
           <div className="space-y-6">
             <h3 className="text-lg font-medium">Agent Information</h3>
@@ -286,6 +325,52 @@ export default function AdminPropertyForm({
                 <Input value={newFeature} onChange={(e) => setNewFeature(e.target.value)} placeholder="Add a new feature" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddFeature(); } }} />
                 <Button type="button" onClick={handleAddFeature}><Plus className="h-4 w-4 mr-2" />Add</Button>
               </div>
+            </div>
+          </div>
+          
+          {/* Custom Key Points */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Custom Key Points</h3>
+                <p className="text-sm text-muted-foreground">
+                  Add up to {MAX_CUSTOM_KEY_POINTS} unique features of the property.
+                </p>
+              </div>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={handleAddKeyPoint}
+                disabled={(formData.key_points?.length || 0) >= MAX_CUSTOM_KEY_POINTS}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Point
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {formData.key_points?.map((point, index) => (
+                <div key={index} className="flex items-center gap-4 p-4 border rounded-md bg-muted/50">
+                  <IconPicker 
+                    value={point.icon as IconName}
+                    onChange={(icon) => handleKeyPointChange(index, 'icon', icon)}
+                  />
+                  <Input
+                    placeholder="e.g., 'Ocean View'"
+                    value={point.text}
+                    onChange={(e) => handleKeyPointChange(index, 'text', e.target.value)}
+                    className="flex-grow"
+                  />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveKeyPoint(index)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {(formData.key_points?.length || 0) === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No custom key points added.
+                </p>
+              )}
             </div>
           </div>
           

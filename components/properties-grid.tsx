@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 import { 
   Card, 
   CardContent, 
@@ -17,9 +18,10 @@ import {
   ChevronRight,
   Home as HomeIcon,
   Building,
-  DollarSign
+  IndianRupee
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { renderIcon, IconName } from '@/lib/icons';
 import PropertyImageCarousel from "@/components/property-image-carousel";
 import { Property } from "@/types/property";
 
@@ -52,17 +54,37 @@ const priceRanges = [
   { value: 'custom', label: 'Custom' },
 ];
 
+const LAND_TYPES = ['Land', 'Plot / Land'];
+
 export default function PropertiesGrid({ initialProperties }: PropertiesGridProps) {
-  const [propertyType, setPropertyType] = useState('all');
+  const searchParams = useSearchParams();
+  const initialType = searchParams.get('type') || 'all';
+
+  const [propertyType, setPropertyType] = useState(initialType);
   const [priceRange, setPriceRange] = useState('all');
   const [customMinPrice, setCustomMinPrice] = useState('');
   const [customMaxPrice, setCustomMaxPrice] = useState('');
   
+  useEffect(() => {
+    const typeFromUrl = searchParams.get('type');
+    if (typeFromUrl && propertyTypes.some(t => t.value === typeFromUrl)) {
+      setPropertyType(typeFromUrl);
+    }
+  }, [searchParams]);
+  
   // Filter properties based on selected filters
   const filteredProperties = initialProperties.filter((property: Property) => {
     // Filter by property type
-    if (propertyType !== 'all' && property.property_type !== propertyType) {
-      return false;
+    if (propertyType !== 'all') {
+      // If the selected filter is a land type, check if the property is any of the land types.
+      if (LAND_TYPES.includes(propertyType)) {
+        if (!LAND_TYPES.includes(property.property_type)) {
+          return false;
+        }
+      // Otherwise, do a direct match.
+      } else if (property.property_type !== propertyType) {
+        return false;
+      }
     }
     
     // Filter by price
@@ -108,7 +130,7 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
         </div>
         
         <div className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <IndianRupee className="h-4 w-4 text-muted-foreground" />
           <select 
             className="bg-background border rounded-md text-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
             value={priceRange}
@@ -147,7 +169,22 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
       
       {/* Properties grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        {filteredProperties.map((property: Property) => (
+        {filteredProperties.map((property: Property) => {
+          const isLand = property.property_type === 'Plot / Land' || property.property_type === 'Land';
+          let highlights = [];
+
+          if (isLand) {
+            highlights = (property.key_points || []).slice(0, 3).map(p => ({
+              icon: p.icon,
+              text: p.text,
+            }));
+          } else {
+            if (property.bedrooms) highlights.push({ icon: 'Bed', text: `${property.bedrooms} Beds` });
+            if (property.bathrooms) highlights.push({ icon: 'Bath', text: `${property.bathrooms} Baths` });
+            if (property.sqft) highlights.push({ icon: 'Ruler', text: `${property.sqft.toLocaleString()} sqft` });
+          }
+          
+          return (
           <Card key={property.id} className="overflow-hidden group border-0 rounded-xl shadow-sm hover:shadow-md transition-all">
             <CardContent className="p-0 relative">
               <PropertyImageCarousel images={property.images} showThumbnails={false} />
@@ -166,28 +203,16 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
                   </div>
                 </div>
                 
-                <div className="flex justify-between text-sm">
-                  {property.bedrooms && (
-                  <span className="flex items-center">
-                    <Bed className="h-4 w-4 mr-1" />
-                    {property.bedrooms} Beds
-                  </span>
-                  )}
-                  {property.bathrooms && (
-                  <span className="flex items-center">
-                    <Bath className="h-4 w-4 mr-1" />
-                    {property.bathrooms} Baths
-                  </span>
-                  )}
-                  {property.sqft && (
-                  <span className="flex items-center">
-                    <Move className="h-4 w-4 mr-1" />
-                    {property.sqft.toLocaleString()} sqft
-                  </span>
-                  )}
+                <div className="flex justify-between text-sm flex-wrap gap-x-4 gap-y-2">
+                  {highlights.map((h, i) => (
+                    <span key={i} className="flex items-center text-muted-foreground">
+                      {renderIcon(h.icon as IconName, { className: "h-4 w-4 mr-1.5" })}
+                      {h.text}
+                    </span>
+                  ))}
                 </div>
                 
-                <p className="text-muted-foreground line-clamp-2">
+                <p className="text-muted-foreground line-clamp-2 h-[40px]">
                   {property.description}
                 </p>
               </div>
@@ -202,7 +227,8 @@ export default function PropertiesGrid({ initialProperties }: PropertiesGridProp
               </Button>
             </CardFooter>
           </Card>
-        ))}
+          )
+        })}
       </div>
       
       {filteredProperties.length === 0 && (

@@ -2,7 +2,11 @@ import Link from 'next/link';
 import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function Footer() {
+interface FooterProps {
+  topPropertyTypes: string[];
+}
+
+export default function Footer({ topPropertyTypes }: FooterProps) {
   return (
     <footer className="bg-card text-card-foreground border-t">
       <div className="container mx-auto px-4 py-12 md:py-16">
@@ -48,19 +52,29 @@ export default function Footer() {
           <div className="space-y-4">
             <h4 className="font-medium">Property Types</h4>
             <ul className="space-y-2">
-              {[
-                { label: 'Luxury Homes' },
-                { label: 'Penthouses' },
-                { label: 'Waterfront Estates' },
-                { label: 'Historic Properties' },
-                { label: 'Vacation Homes' },
-              ].map((item) => (
-                <li key={item.label}>
-                  <span className="text-muted-foreground">
-                    {item.label}
-                  </span>
+              {topPropertyTypes.map((type) => (
+                <li key={type}>
+                  <Link
+                    href={`/properties?type=${encodeURIComponent(type)}`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {type}
+                  </Link>
                 </li>
               ))}
+              {topPropertyTypes.length === 0 && (
+                [
+                  'Luxury Homes',
+                  'Penthouses',
+                  'Waterfront Estates',
+                  'Historic Properties',
+                  'Vacation Homes',
+                ].map((item) => (
+                  <li key={item}>
+                    <span className="text-muted-foreground">{item}</span>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 

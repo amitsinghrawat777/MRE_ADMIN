@@ -18,7 +18,8 @@ export default function PropertiesView({ properties }: PropertiesViewProps) {
       return properties;
     }
     return properties.filter(property => {
-      const searchIn = `${property.title} ${property.location} ${property.description}`.toLowerCase();
+      const keyPointsText = (property.key_points || []).map(p => p.text).join(' ');
+      const searchIn = `${property.title} ${property.location} ${property.description} ${keyPointsText}`.toLowerCase();
       return searchIn.includes(lowercasedSearchTerm);
     });
   }, [properties, searchTerm]);
@@ -28,6 +29,7 @@ export default function PropertiesView({ properties }: PropertiesViewProps) {
       <PropertiesHeader 
         searchTerm={searchTerm}
         onSearchTermChange={setSearchTerm}
+        properties={properties}
       />
       <section className="py-10 flex-grow">
         <div className="container mx-auto px-4">

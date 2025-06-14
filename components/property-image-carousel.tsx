@@ -41,64 +41,64 @@ export default function PropertyImageCarousel({ images, showThumbnails = true }:
             className="h-full relative rounded-lg overflow-hidden cursor-pointer"
             onClick={() => setOpen(true)}
           >
-            <Image
-              src={images[currentIndex]}
-              alt="Property image"
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        <Image
+          src={images[currentIndex]}
+          alt="Property image"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-contain"
-              priority
-            />
+          priority
+        />
             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-40 transition-opacity z-10 flex items-center justify-center">
               <p className="text-white text-lg font-semibold">Click to view</p>
             </div>
-          </div>
+      </div>
 
-          {/* Navigation buttons */}
+      {/* Navigation buttons */}
           {images.length > 1 && (
             <>
-              <div className="absolute top-1/2 left-4 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="secondary" 
-                  size="icon"
-                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                  onClick={goToPrevious}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="absolute top-1/2 right-4 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="secondary" 
-                  size="icon"
-                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                  onClick={goToNext}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+      <div className="absolute top-1/2 left-4 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button 
+          variant="secondary" 
+          size="icon"
+          className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+          onClick={goToPrevious}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+      </div>
+      <div className="absolute top-1/2 right-4 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button 
+          variant="secondary" 
+          size="icon"
+          className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+          onClick={goToNext}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
             </>
           )}
 
-          {/* Indicators */}
-          {images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5 z-20">
-              {images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full transition-all",
-                    index === currentIndex 
-                      ? "bg-white w-4" 
-                      : "bg-white/60 hover:bg-white/80"
-                  )}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
+      {/* Indicators */}
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5 z-20">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={cn(
+                "w-1.5 h-1.5 rounded-full transition-all",
+                index === currentIndex 
+                  ? "bg-white w-4" 
+                  : "bg-white/60 hover:bg-white/80"
+              )}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
+      )}
+    </div>
 
         {/* Thumbnails */}
         {showThumbnails && images.length > 1 && (
